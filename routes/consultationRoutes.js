@@ -1,0 +1,99 @@
+const express = require("express");
+const router = express.Router();
+const Consultation = require("../models/consultation");
+const Patient = require("../models/patient");
+
+function handleError(res, err) {
+  if (err.name === "ValidationError") {
+    const erreurs = Object.values(err.errors).map(e => e.message);
+    return res.status(400).json({ message: "Données invalides", erreurs });
+  }
+  if (err.name === "CastError") {
+    return res.status(400).json({ message: "Identifiant invalide" });
+  }
+  console.error(err);
+  return res.status(500).json({ message: "Erreur serveur" });
+}
+
+// CREATE; vérifier que le patient existe
+router.post("/", async (req, res) => {
+  try {
+    if (!req.body.patient) {
+      return res.status(400).json({ message: "Le patient est obligatoire" });
+    }
+    const existe = await Patient.exists({ _id: req.body.patient });
+    if (!existe) return res.status(404).json({ message: "Patient introuvable" });
+
+    const consultation = new Consultation(req.body);
+    await consultation.save();
+    const resultat = await Consultation.findById(consultation._id)
+      .populate("patient", "nom prenom");
+    return res.status(201).json(resultat);
+  } catch (err) {
+    return handleError(res, err);
+  }
+});
+
+// READ ALL; filtres ?patient=<id>&statut=Terminée
+router.get("/", async (req, res) => {
+  try {
+    const filtre = {};
+    if (req.query.patient) filtre.patient = req.query.patient;
+    if (req.query.statut) filtre.statut = req.query.statut;
+
+    const consultations = await Consultation.find(filtre)
+      .populate("patient", "nom prenom")
+      .sort({ date: -1 });
+    return res.json(consultations);
+  } catch (err) {
+    return handleError(res, err);
+  }
+});
+
+// READ ONE
+router.get("/:id", async (req, res) => {
+  try {
+    const consultation = await Consultation.findById(req.params.id)
+      .populate("patient", "nom prenom");
+    if (!consultation) {
+      return res.status(404).json({ message: "Consultation introuvable" });
+    }
+    return res.json(consultation);
+  } catch (err) {
+    return handleError(res, err);
+  }
+});
+
+// UPDATE
+router.put("/:id", async (req, res) => {
+  try {
+    const consultation = await Consultation.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { returnDocument: "after", runValidators: true }
+    );
+    if (!consultation) {
+      return res.status(404).json({ message: "Consultation introuvable" });
+    }
+    const resultat = await Consultation.findById(consultation._id)
+      .populate("patient", "nom prenom");
+    return res.json(resultat);
+  } catch (err) {
+    return handleError(res, err);
+  }
+});
+
+// DELETE
+router.delete("/:id", async (req, res) => {
+  try {
+    const consultation = await Consultation.findByIdAndDelete(req.params.id);
+    if (!consultation) {
+      return res.status(404).json({ message: "Consultation introuvable" });
+    }
+    return res.status(204).send();
+  } catch (err) {
+    return handleError(res, err);
+  }
+});
+
+module.exports = router;

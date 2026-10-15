@@ -1,0 +1,55 @@
+{
+  "info": {
+    "name": "TP Node Mongo - API Cabinet",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "request": { "method": "GET", "url": "http://localhost:5000/api/health" }
+    },
+    {
+      "name": "Créer patient",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"nom\":\"Ben Salah\",\"prenom\":\"Ali\",\"age\":34,\"telephone\":\"22123456\",\"medecin\":\"Dr Helmi\"}", "options": { "raw": { "language": "json" } } },
+        "url": "http://localhost:5000/api/patients"
+      }
+    },
+    {
+      "name": "Lire tous les patients",
+      "request": { "method": "GET", "url": "http://localhost:5000/api/patients" }
+    },
+    {
+      "name": "Patients actifs",
+      "request": { "method": "GET", "url": "http://localhost:5000/api/patients?statut=Actif" }
+    },
+    {
+      "name": "Créer consultation (remplacer PATIENT_ID)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"patient\":\"PATIENT_ID\",\"date\":\"2026-10-05\",\"motif\":\"Contrôle régulier\",\"traitement\":\"Aucun\",\"medecin\":\"Dr Helmi\",\"notes\":\"Patient en bonne santé\"}", "options": { "raw": { "language": "json" } } },
+        "url": "http://localhost:5000/api/consultations"
+      }
+    },
+    {
+      "name": "Lire consultations",
+      "request": { "method": "GET", "url": "http://localhost:5000/api/consultations" }
+    },
+    {
+      "name": "Créer mesure",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"capteur\":\"esp32-salle1\",\"type\":\"temperature\",\"valeur\":25.4,\"unite\":\"°C\"}", "options": { "raw": { "language": "json" } } },
+        "url": "http://localhost:5000/api/mesures"
+      }
+    },
+    {
+      "name": "Lire mesures",
+      "request": { "method": "GET", "url": "http://localhost:5000/api/mesures?capteur=esp32-salle1&type=temperature&limit=50" }
+    }
+  ]
+}
